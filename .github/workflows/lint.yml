@@ -1,0 +1,21 @@
+name: Lint
+
+on:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+      - name: Install Python
+        run: uv python install
+      - name: Run linting
+        run: |
+          uvx pre-commit run --all-files --show-diff-on-failure
