@@ -1,0 +1,12 @@
+.venv/
+.idea/
+.junie/
+*.conf
+__pycache__/
+*~
+.pytest_cache/
+.ruff_cache/
+build/
+requirements.txt
+*.egg-info/
+.coverage

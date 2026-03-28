@@ -1,0 +1,36 @@
+[project]
+name = "wg-config"
+version = "0.1.0"
+description = "WireGuard configuration generator"
+requires-python = ">=3.13"
+dependencies = [
+    "jinja2>=3.1.6",
+    "cryptography>=42",
+    "pyyaml>=6.0.1",
+    "pydantic>=2.11.7",
+    "fire>=0.6.0",
+]
+
+[project.scripts]
+wg-config = "wg_config:main"
+
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=7.1.0",
+]
+
+[tool.uv]
+package = true
+
+[tool.ruff.lint]
+
+select = ["E", "F", "N", "D", "PL", "I"]
+
+[tool.ruff.lint.per-file-ignores]
+"wg_config.py" = ["E501"]
+"tests/**" = ["D103"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google" # Example for Google style
