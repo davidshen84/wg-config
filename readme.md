@@ -6,6 +6,8 @@ WireGuard has a weak definition of *server* and *client* — in theory, any peer
 
 Keys are generated automatically and written back into `config.yaml` on first run, so you never have to manage them manually.
 
+**Note**: `config.yaml` will contain wireguard connection credential information.
+
 ## Requirements
 
 - Python 3.13+
@@ -29,7 +31,7 @@ uv tool install .
 Or run without installing:
 
 ```bash
-uvx --from . wg-config --help
+uvx --from git+https://github.com/davidshen84/wg-config  wg-config --help
 ```
 
 ## Usage
@@ -92,6 +94,7 @@ peers:
     allowed_ips:               # Traffic to route through the VPN tunnel
       - 0.0.0.0/0
       - ::0/0
+    dns: 1.1.1.1              # Optional DNS server
 ```
 
 **Key rules:**
