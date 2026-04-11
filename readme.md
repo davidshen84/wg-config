@@ -94,6 +94,7 @@ peers:
     allowed_ips:               # Traffic to route through the VPN tunnel
       - 0.0.0.0/0
       - ::0/0
+    dns: 1.1.1.1              # Optional DNS server
 ```
 
 **Key rules:**
