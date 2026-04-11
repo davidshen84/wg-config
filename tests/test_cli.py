@@ -12,6 +12,8 @@ Coverage:
   - init: custom lan_ip replaces default 192.168.1.0 (passing)
   - generate: server and client .conf files are created (passing)
   - generate: YAML is updated with keys after generation (passing)
+  - generate: DNS entry is present in generated .conf when specified (passing)
+  - generate: DNS entry is absent when not specified (passing)
   - generate: existing keys are preserved on re-generation (passing)
   - generate: new peers receive keys on next generation (passing)
 """
@@ -135,3 +137,76 @@ def test_generate_keys_created_for_new_peer(generated):
     assert "keys" in client2
     assert "public" in client2["keys"]
     assert "private" in client2["keys"]
+
+
+def test_generate_dns_property(tmp_path):
+    os.chdir(tmp_path)
+    cli = CLI()
+    config_path = "test_config.yaml"
+    output_dir = "output"
+
+    # Initialize config
+    cli.init(config=config_path)
+
+    # Load and modify config to add dns
+    with open(config_path, "r") as f:
+        data = yaml.safe_load(f)
+
+    # Add dns to server
+    data["peers"][0]["dns"] = "1.1.1.1"
+    # Add dns to client1
+    data["peers"][1]["dns"] = "8.8.8.8, 8.8.4.4"
+
+    with open(config_path, "w") as f:
+        yaml.safe_dump(data, f)
+
+    # Generate configs
+    cli.generate(config=config_path, output_dir=output_dir)
+
+    # Check server config
+    server_conf = os.path.join(output_dir, "wg_server.conf")
+    assert os.path.exists(server_conf)
+    with open(server_conf, "r") as f:
+        content = f.read()
+        assert "DNS = 1.1.1.1" in content
+
+    # Check client config
+    client_conf = os.path.join(output_dir, "wg_client1_to_server.conf")
+    assert os.path.exists(client_conf)
+    with open(client_conf, "r") as f:
+        content = f.read()
+        assert "DNS = 8.8.8.8, 8.8.4.4" in content
+
+
+def test_generate_no_dns_property(tmp_path):
+    os.chdir(tmp_path)
+    cli = CLI()
+    config_path = "test_config.yaml"
+    output_dir = "output"
+
+    # Initialize config
+    cli.init(config=config_path)
+
+    # Load and modify config to remove dns (which is now in the sample)
+    with open(config_path, "r") as f:
+        data = yaml.safe_load(f)
+    for peer in data["peers"]:
+        if "dns" in peer:
+            del peer["dns"]
+    with open(config_path, "w") as f:
+        yaml.safe_dump(data, f)
+
+    # Generate configs (no dns)
+    cli.generate(config=config_path, output_dir=output_dir)
+
+    # Check server config
+    server_conf = os.path.join(output_dir, "wg_server.conf")
+    with open(server_conf, "r") as f:
+        content = f.read()
+        assert "DNS =" not in content
+
+    # Check client config
+    client_conf = os.path.join(output_dir, "wg_client1_to_server.conf")
+    with open(client_conf, "r") as f:
+        content = f.read()
+        assert "DNS =" not in content

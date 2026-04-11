@@ -49,6 +49,7 @@ peers:
     allowed_ips:
       - 0.0.0.0/0
       - ::0/0
+    dns: 1.1.1.1
 """
 
 _peer_template = """
@@ -57,6 +58,9 @@ PrivateKey = {{ private_key }}
 Address = {{ addresses | join(', ') }}
 {% if listen_port %}
 ListenPort = {{ listen_port }}
+{% endif %}
+{% if dns %}
+DNS = {{ dns }}
 {% endif %}
 
 {% for script in post_scripts %}
@@ -169,6 +173,7 @@ class Peer(BaseModel):
 
     # Optional sections present only for some peers
     endpoint: Optional[Endpoint] = None
+    dns: Optional[str] = None
 
     @model_validator(mode="after")
     def check_allowed_peers_and_endpoint(self) -> Self:
@@ -275,6 +280,7 @@ class CLI:
                 private_key=peer.keys.private,
                 addresses=peer.addresses,
                 listen_port=peer.endpoint.port,
+                dns=peer.dns,
                 post_scripts=peer.post_scripts,
                 peers=peers.get_allowed_peers(peer.name),
             )
@@ -288,6 +294,7 @@ class CLI:
                 rendered = template.render(
                     private_key=remote_peer.keys.private,
                     addresses=remote_peer.addresses,
+                    dns=remote_peer.dns,
                     post_scripts=remote_peer.post_scripts,
                     allowed_ips=remote_peer.allowed_ips,
                     endpoint=peer.endpoint,
